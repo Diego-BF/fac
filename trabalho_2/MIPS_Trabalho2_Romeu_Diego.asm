@@ -32,7 +32,7 @@
 string_separador:	.asciiz "========\n"
 string_mdc: 		.asciiz "MDC: "
 string_mmc: 		.asciiz "\nMMC: "
-string_invalido: 	.asciiz "Entrada invalida\n"
+string_invalido: 	.asciiz "Entrada invalida"
 
 .text
 

@@ -1,71 +1,142 @@
-## Calculo de arco cotg por sÈrie de taylor 
+# Trabalho 03 de FAC
+# C√°lculo do Arco da Cotangente de um n√∫mero Real maior que 0
+# Ser√° resolvida utilizando o Arco da Tangente
 
-.data
 
-verificador1: .float 1
-zero: .float 0
+.data	
 
+	entradaX:  .float  			# Variavel de Entrada
+	arctan:    .float  			# Valor do Arco Tangente
+	arccotg:   .float  			# Valor do Arco Cotangente
+	resultadoTemp: .float  			# Resultado temporario da parcela
+	resultadoFinal: .float			# Resultado final da parcela
+	fatorCorrecao: .float 1.57079632679 	# pi/2 fator de corre√ß√£o para arco de cotangente
+	stringEntrada: .asciiz "Entre com o Valor de X: \n"
+	stringInvalida: .asciiz "Entrada Inv√°lida. \n"
+	valorCotangente: .asciiz "O valor do Arco Cotangente √©: \n"
+	valorZero: .float 0
+	valorUnitario: .float 1
+	
 .text
 
-main: 
-	li $v0, 6 # Le float
-	syscall 
+
+main:
+	# le um numero float
+	li $v0, 6
+	syscall
 	
-	mov.s $f2, $f0 # Move float para f2 para que as operaÁıes possam ser executadas
-	l.s $f4, zero # Valor 0 para comparar a entrada
-	l.s $f3, verificador1 # Carrega o valor para verificar se o intervalo de f0
+	mov.s $f2, $f0 
 	
-	c.lt.s $f2, $f4  # Compara para ver se f2 menor que f3 e seta a flag do coprocessor
-	bc1t entradaInvalida # pular para funÁ„o calculaArctangMenor1
-	c.lt.s $f2, $f3  # Compara para ver se f2 menor que f3 e seta a flag do coprocessor
-	bc1f calculaArctangMaior1 # pula para funÁ„o calculaArctangMaior1 pois o valor inserido È maior que 1
-	j calculaArctangMenor1 # pula para funÁ„o calculaArctangMaior1 pois o valor inserido È menor que 1
+	# O registrador f3 ser√° usado para compara√ß√µes do if/else
+	l.s $f3, valorZero
+	c.lt.s $f2, $f3
+	bc1t entradaInvalida
+	
+	l.s $f3, valorUnitario
+	c.lt.s $f2, $f3
+	bc1f calculaArctanMaior1
+	j calculaArctanMenor1
 	
 
 	
+calculaArctanMenor1:
+	
+	li $t1, 1						# valor inicial do contador do Indice
+	li $t2, 23					# valor final do contador do Indice
+	li $t3, 1						# valor do contador do sinal
+	
+	
+	loopArcTan:
+	bgt $t1, $t2, retornaValorCotangMenor1 		# Criterio arbitrario de parada do loop de termos
+	beq $t3, 1, calculaTermoSomaPart1				# Compara√ß√£o que decide se soma ou subtrai o termo
+	# jal calculaTermoSubtracaoPart1  TODO
+	j loopArcTan
 
-calculaArctangMenor1:
 
-	addi $s0, $zero, 1 # inciando o contador em 1
-	
-	expoenteDenominador:	
-	beq $s0, 7, calculaArctangMenor1 # Limite arbitrario 
-	jal armazenaExpoente
-	div.s $f12, $f0, $s0 # verificar se precisa converter para float
-	## Salvar resultado em variavel final somando os termos
-	addi $s0, $s0, 2 # Incrementa de 2 em 2 t0
-	j expoenteDenominador
-	
-	armazenaExpoente:  # Rotina que eu arrumo a variavel do expoente 
-	addi $t0, $s0, 0 # salva de s0 para t0 armazena o expoente no t0
-	add.s $f0, $f4, $f2 # Salva o valor incial em f0
-	
-	loop:
-	beq $t0, 1, exitCalculaTermo  # verifcando se o expoente ja chegou em 1
-	mul.s $f0, $f0, $f0 # realiza a exponenciacao de 1 vez
-	addi $t0, $t0, -1 # decrementa o exponete em 1 para chegar na condicao desejada
-	j loop	
-	
 
-	
-	exitCalculaTermo:
-	j $ra # Volta por jal
-	
-	
-	
-	
-	
+
+calculaTermoSomaPart1:
+	j powSoma  # Apenas somando a fun√ß√£o de exponencial
 		
 
+calculaTermoSomaPart2:
+	div.s $f12, $f11, $t1						# Divide o resultado da exponencial pelo indice correspondente
+	add.s $f15, $f15, $f12					# salva em f15 o valor do termo
+	subi $t3, $t3, 1								# alterna o valor da variavel que controla o valor do termo
+	addi $t1, $t1, 2								# Incrementa o contador do LoopArcTan
+	j loopArcTan										# Volta para loopArcTan
 	
-calculaArctangMaior1:
+powSoma:
+	li $t4, 1										# contador da exponenciacao
+	add.s $f10, $f3, $f2 				# salvando o valor inicial em f10
+	
+	exponenciacaoSoma:
+	bgt $t4, $t1, calculaTermoSomaPart2						# quando t4 atingir t1 voltara para calculaTermoSoma
+	mul.s $f11, $f11, $f10												# realiza a exponenciacao salvando em f11 o resultado 
+	addi $t4, $t4, 1															# Soma 1 ao contador da exponenciacao
+	j	exponenciacaoSoma
 
+
+
+
+
+calculaTermoSubPart1:
+	j powSub  # Apenas somando a fun√ß√£o de exponencial
 		
+
+calculaTermoSubPart2:
+	div.s $f12, $f11, $t1						# Divide o resultado da exponencial pelo indice correspondente
+	sub.s $f15, $f15, $f12					# salva em f15 o valor do termo
+	addi $t3, $t3, 1								# alterna o valor da variavel que controla o valor do termo
+	addi $t1, $t1, 2								# Incrementa o contador do LoopArcTan
+	j loopArcTan										# Volta para loopArcTan
+	
+powSub:
+	li $t4, 1										# contador da exponenciacao
+	add.s $f10, $f3, $f2 				# salvando o valor inicial em f10
+	
+	exponenciacaoSub:
+	bgt $t4, $t1, calculaTermoSubPart2						# quando t4 atingir t1 voltara para calculaTermoSoma
+	mul.s $f11, $f11, $f10												# realiza a exponenciacao salvando em f11 o resultado 
+	addi $t4, $t4, 1															# Soma 1 ao contador da exponenciacao
+	j	exponenciacaoSub
+
+retornaValorCotangMenor1:
+	
+	l.s $f20, fatorCorrecao			# Carrega o fator de correcao em f20				
+	sub.s $f21, $f20, $f15			# Retorna o valor da cotangente para Menor 1 em f21
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+calculaArctanMaior1:
+	
 	
 entradaInvalida:
+	li $v0, 4
+	la $a0, stringInvalida
+	syscall
+	
 	li $v0, 10
 	syscall
 
+
+	
+	
 
 
 

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-
+// implementado
 float my_exp(float a, int b){
   float result = 1;
 
@@ -13,7 +13,7 @@ float my_exp(float a, int b){
 
 int main() {
 
-  float entradaX; // Entrada salva em $f2
+  float entradaX;
   float arctan;
   float arccotg;
   float resultadoTemp = 0;
@@ -21,13 +21,11 @@ int main() {
   float resultadoFinal = 0;
   int contadorSinal = 1;
 
-
   printf("Entre com o valor de X\n");
   scanf("%f", &entradaX);
 
   if (entradaX >= 0 && entradaX < 1){
     for ( int contadorIndice = 1; contadorIndice < 23; contadorIndice += 2) {
-      printf("%d\n", contadorIndice);
       if (contadorSinal == 1) {
           resultadoTemp = my_exp(entradaX,contadorIndice);
           resultadoFinal = resultadoTemp/contadorIndice;
